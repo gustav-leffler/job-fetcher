@@ -25,7 +25,7 @@ const fetchJobPost = async (url) => {
     }
   } catch (e) {
     if (e?.response?.status === 429) {
-      console.log("LinkedIn thinks we are going to fast, lets wait 5 seconds.");
+      console.log("LinkedIn thinks we are going too fast, lets wait 5 seconds.");
       await new Promise((r) => setTimeout(r, 5000));
       return await fetchJobPost(url);
     } else {
@@ -69,7 +69,7 @@ const fetchPage = async (start) => {
     return jobPosts;
   } catch (e) {
     if (e?.response?.status === 429) {
-      console.log("LinkedIn thinks we are going to fast, lets wait 5 seconds.");
+      console.log("LinkedIn thinks we are going too fast, lets wait 5 seconds.");
       await new Promise((r) => setTimeout(r, 5000));
       return await fetchPage(start);
     } else {
