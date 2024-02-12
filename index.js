@@ -12,8 +12,17 @@ const fetchJobPost = async (url) => {
     const html = resp.data;
 
     const $ = cheerio.load(html);
-    const jobPosting = JSON.parse($("script[type=application/ld+json]").html());
-    return jobPosting;
+    const jobPostingJson = $("script[type=application/ld+json]").html();
+    if (jobPostingJson) {
+      const jobPosting = JSON.parse(jobPostingJson);
+      return jobPosting;
+    } else {
+      console.warn("Unable to fetch JobPosting for", url);
+      // TODO: if the page doesn't contain a JobPosting-object we have to crawl it manually.
+      // If it is needed? I'm not sure why all pages doesn't have this
+      // With manual crawling im not able to find a validThrough-date, which I think we require?
+      return {};
+    }
   } catch (e) {
     if (e?.response?.status === 429) {
       console.log("LinkedIn thinks we are going to fast, lets wait 5 seconds.");
@@ -40,15 +49,22 @@ const fetchPage = async (start) => {
     const jobs = $("li");
     const jobUrls = [];
     jobs.each((_, element) => {
-      const url = $(element)
-        .find("a.base-card__full-link")
-        .attr("href")
-        .split("?")[0];
-      jobUrls.push(url);
+      try {
+        const url = $(element).find("a").attr("href").split("?")[0];
+        jobUrls.push(url);
+      } catch (e) {
+        console.log("error:", e);
+      }
     });
     for (const jobUrl of jobUrls) {
-      const jobPost = await fetchJobPost(jobUrl);
-      jobPosts.push(jobPost);
+      try {
+        const jobPost = await fetchJobPost(jobUrl);
+        if (jobPost?.title) {
+          jobPosts.push(jobPost);
+        }
+      } catch (e) {
+        console.error("Failed to fetch jobPosting for", jobUrl);
+      }
     }
     return jobPosts;
   } catch (e) {
@@ -64,9 +80,10 @@ const fetchPage = async (start) => {
 
 const fetchLinkedInJobs = async () => {
   let jobs = [];
-  for (let i = 0; i < 1000; i += 25) {
+  for (let i = 0; i < 10000; i += 25) {
     console.log("Fetching", i, "-", i + 25);
     const fetchedJobs = await fetchPage(i);
+    console.log("fetched", fetchedJobs.length, "from page ", i, "-", i + 25);
     jobs = jobs.concat(fetchedJobs);
     if (fetchedJobs.length === 0) {
       break;
