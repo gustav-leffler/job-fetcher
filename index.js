@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const { toXML } = require("to-xml");
 
+const OUTPUT = "jobs.xml";
 // const KEYWORDS = "%23gatewayumea2024";
 const KEYWORDS = "";
 
@@ -17,7 +18,7 @@ const fetchJobPost = async (url) => {
       const jobPosting = JSON.parse(jobPostingJson);
       return jobPosting;
     } else {
-      console.warn("Unable to fetch JobPosting for", url);
+      console.warn("Unable to fetch JobPosting for", url, '(does not contain JobPosting data)');
       // TODO: if the page doesn't contain a JobPosting-object we have to crawl it manually.
       // If it is needed? I'm not sure why all pages doesn't have this
       // With manual crawling im not able to find a validThrough-date, which I think we require?
@@ -25,11 +26,14 @@ const fetchJobPost = async (url) => {
     }
   } catch (e) {
     if (e?.response?.status === 429) {
-      console.log("LinkedIn thinks we are going too fast, lets wait 5 seconds.");
+      console.log(
+        "LinkedIn thinks we are going too fast, lets wait 5 seconds."
+      );
       await new Promise((r) => setTimeout(r, 5000));
       return await fetchJobPost(url);
     } else {
-      throw e;
+      console.error("Fetch JobPosting Error", e);
+      return {};
     }
   }
 };
@@ -69,7 +73,9 @@ const fetchPage = async (start) => {
     return jobPosts;
   } catch (e) {
     if (e?.response?.status === 429) {
-      console.log("LinkedIn thinks we are going too fast, lets wait 5 seconds.");
+      console.log(
+        "LinkedIn thinks we are going too fast, lets wait 5 seconds."
+      );
       await new Promise((r) => setTimeout(r, 5000));
       return await fetchPage(start);
     } else {
@@ -100,7 +106,7 @@ const fetchLinkedInJobs = async () => {
     toXML({ jobs: { job: jobs } }, null, 2);
 
   try {
-    fs.writeFileSync("jobs.xml", xml);
+    fs.writeFileSync(OUTPUT, xml);
     console.log("File has been saved.");
   } catch (error) {
     console.error(err);
