@@ -74,7 +74,7 @@ const fetchPage = async (start) => {
         console.error("Failed to fetch jobPosting for", jobUrl);
       }
     }
-    return jobPosts;
+    return { jobUrlsLength: jobUrls.length, jobPosts };
   } catch (e) {
     if (e?.response?.status === 429) {
       console.log(
@@ -90,12 +90,21 @@ const fetchPage = async (start) => {
 
 const fetchLinkedInJobs = async () => {
   let jobs = [];
-  for (let i = 0; i < 10000; i += 25) {
+  for (let i = 0; i < 1000; i += 25) {
     console.log("Fetching", i, "-", i + 25);
-    const fetchedJobs = await fetchPage(i);
-    console.log("fetched", fetchedJobs.length, "from page ", i, "-", i + 25);
-    jobs = jobs.concat(fetchedJobs);
-    if (fetchedJobs.length === 0) {
+    const { jobUrlsLength, jobPosts } = await fetchPage(i);
+    console.log(
+      "fetched",
+      jobPosts.length,
+      "/",
+      jobUrlsLength,
+      "from page ",
+      i,
+      "-",
+      i + 25
+    );
+    jobs = jobs.concat(jobPosts);
+    if (jobUrlsLength.length === 0) {
       break;
     }
   }
