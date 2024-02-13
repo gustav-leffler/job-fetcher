@@ -16,6 +16,10 @@ const fetchJobPost = async (url) => {
     const jobPostingJson = $("script[type=application/ld+json]").html();
     if (jobPostingJson) {
       const jobPosting = JSON.parse(jobPostingJson);
+      const decoratedId = $("#decoratedJobPostingId").html();
+      const id = decoratedId.match(/\d+/)[0];
+      jobPosting.id = id;
+      jobPosting.url = url;
       return jobPosting;
     } else {
       console.warn(
