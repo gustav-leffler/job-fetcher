@@ -18,7 +18,11 @@ const fetchJobPost = async (url) => {
       const jobPosting = JSON.parse(jobPostingJson);
       return jobPosting;
     } else {
-      console.warn("Unable to fetch JobPosting for", url, '(does not contain JobPosting data)');
+      console.warn(
+        "Unable to fetch JobPosting for",
+        url,
+        "(does not contain JobPosting data)"
+      );
       // TODO: if the page doesn't contain a JobPosting-object we have to crawl it manually.
       // If it is needed? I'm not sure why all pages doesn't have this
       // With manual crawling im not able to find a validThrough-date, which I think we require?
