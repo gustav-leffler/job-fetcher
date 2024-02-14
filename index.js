@@ -4,6 +4,7 @@ const fs = require("fs");
 const { toXML } = require("to-xml");
 
 const OUTPUT = "jobs.xml";
+const CONTENT_FILTER = "#gatewayumea2024";
 // const KEYWORDS = "%23gatewayumea2024";
 const KEYWORDS = "";
 
@@ -20,7 +21,13 @@ const fetchJobPost = async (url) => {
       const id = decoratedId.match(/\d+/)[0];
       jobPosting.id = id;
       jobPosting.url = url;
-      return jobPosting;
+
+      // Only include jobs that contains CONTENT_FILTER in description
+      if (jobPosting.description.indexOf(CONTENT_FILTER) > -1) {
+        return jobPosting;
+      } else {
+        return null;
+      }
     } else {
       console.warn(
         "Unable to fetch JobPosting for",
@@ -30,7 +37,7 @@ const fetchJobPost = async (url) => {
       // TODO: if the page doesn't contain a JobPosting-object we have to crawl it manually.
       // If it is needed? I'm not sure why all pages doesn't have this
       // With manual crawling im not able to find a validThrough-date, which I think we require?
-      return {};
+      return null;
     }
   } catch (e) {
     if (e?.response?.status === 429) {
@@ -41,7 +48,7 @@ const fetchJobPost = async (url) => {
       return await fetchJobPost(url);
     } else {
       console.error("Fetch JobPosting Error", e);
-      return {};
+      return null;
     }
   }
 };
