@@ -3,10 +3,10 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const { toXML } = require("to-xml");
 
-const OUTPUT = "jobs.xml";
+// Det som står innanför citattecknen är det som söks efter i brödtexten för att jobbannonsen ska tas med
 const CONTENT_FILTER = "#gatewayumea2024";
-// const KEYWORDS = "%23gatewayumea2024";
-const KEYWORDS = "";
+
+const OUTPUT = "jobs.xml";
 
 const fetchJobPost = async (url) => {
   try {
@@ -53,15 +53,10 @@ const fetchJobPost = async (url) => {
   }
 };
 
-const fetchPage = async (start) => {
+const fetchPage = async (start, searchUrl) => {
   try {
     const jobPosts = [];
-    const resp = await axios.get(
-      "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=" +
-        KEYWORDS +
-        "&location=Ume%C3%A5%2C%2BV%C3%A4sterbotten%2C%2BSweden&geoId=&trk=public_jobs_jobs-search-bar_search-submit&start=" +
-        start
-    );
+    const resp = await axios.get(searchUrl + "&start=" + start);
     const html = resp.data;
 
     const $ = cheerio.load(html);
@@ -92,33 +87,64 @@ const fetchPage = async (start) => {
         "LinkedIn thinks we are going too fast, lets wait 5 seconds."
       );
       await new Promise((r) => setTimeout(r, 5000));
-      return await fetchPage(start);
+      return await fetchPage(start, searchUrl);
     } else {
       throw e;
     }
   }
 };
 
+const getSearchLinks = () => {
+  const content = fs.readFileSync("search_links.txt", {
+    encoding: "utf8",
+    flag: "r",
+  });
+  const searchLinks = content.split("\r\n");
+  return searchLinks
+    .map((searchLink) => {
+      return searchLink
+        .replace(/&start=\d*/, "")
+        .replace(
+          "linkedin.com/jobs/search?",
+          "linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
+        );
+    })
+    .filter((searchLink) => searchLink.length);
+};
+
 const fetchLinkedInJobs = async () => {
+  const searchLinks = getSearchLinks();
+
   let jobs = [];
-  for (let i = 0; i < 1000; i += 25) {
-    console.log("Fetching", i, "-", i + 25);
-    const { jobUrlsLength, jobPosts } = await fetchPage(i);
-    console.log(
-      "fetched",
-      jobPosts.length,
-      "/",
-      jobUrlsLength,
-      "from page ",
-      i,
-      "-",
-      i + 25
-    );
-    jobs = jobs.concat(jobPosts);
-    if (jobUrlsLength.length === 0) {
-      break;
+  for (const searchLink of searchLinks) {
+    console.log("Fetching from", searchLink);
+    for (let i = 0; i < 1000; i += 25) {
+      console.log("Fetching", i, "-", i + 25);
+      const { jobUrlsLength, jobPosts } = await fetchPage(i, searchLink);
+      console.log(
+        "fetched",
+        jobPosts.length,
+        "/",
+        jobUrlsLength,
+        "from page ",
+        i,
+        "-",
+        i + 25
+      );
+      jobs = jobs.concat(jobPosts);
+      if (jobUrlsLength === 0) {
+        break;
+      }
     }
   }
+  
+  jobs = jobs.reduce((accumulator, current) => {
+    if (!accumulator.find((item) => item.id === current.id)) {
+      accumulator.push(current);
+    }
+    return accumulator;
+  }, []);
+
   console.log("Done fetching jobs, found", jobs.length, "jobs");
 
   jobs.sort((a, b) =>
