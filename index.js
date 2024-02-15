@@ -137,7 +137,8 @@ const fetchLinkedInJobs = async () => {
       }
     }
   }
-  
+
+  // Remove duplicates
   jobs = jobs.reduce((accumulator, current) => {
     if (!accumulator.find((item) => item.id === current.id)) {
       accumulator.push(current);
