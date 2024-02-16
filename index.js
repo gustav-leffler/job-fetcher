@@ -19,12 +19,26 @@ const fetchJobPost = async (url) => {
       const jobPosting = JSON.parse(jobPostingJson);
       const decoratedId = $("#decoratedJobPostingId").html();
       const id = decoratedId.match(/\d+/)[0];
-      jobPosting.id = id;
-      jobPosting.url = url;
+
+      const job = {
+        location: jobPosting.jobLocation?.address?.addressLocality ?? "",
+        title: jobPosting.title,
+        country: jobPosting.jobLocation?.address?.addressCountry ?? "",
+        job_type: jobPosting.employmentType,
+        posted_at: jobPosting.datePosted,
+        job_reference: id,
+        company: jobPosting.hiringOrganization.name,
+        company_logo: jobPosting.hiringOrganization.logo,
+        company_website: jobPosting.hiringOrganization.sameAs,
+        category: jobPosting.industry,
+        url: url,
+        description: jobPosting.description,
+        valid_through: jobPosting.validThrough,
+      };
 
       // Only include jobs that contains CONTENT_FILTER in description
-      if (jobPosting.description.indexOf(CONTENT_FILTER) > -1) {
-        return jobPosting;
+      if (job.description.indexOf(CONTENT_FILTER) > -1) {
+        return job;
       } else {
         return null;
       }
@@ -154,7 +168,7 @@ const fetchLinkedInJobs = async () => {
 
   const xml =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    toXML({ jobs: { job: jobs } }, null, 2);
+    toXML({ source: { jobs: { job: jobs } } }, null, 2);
 
   try {
     fs.writeFileSync(OUTPUT, xml);
