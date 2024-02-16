@@ -154,7 +154,7 @@ const fetchLinkedInJobs = async () => {
 
   // Remove duplicates
   jobs = jobs.reduce((accumulator, current) => {
-    if (!accumulator.find((item) => item.id === current.id)) {
+    if (!accumulator.find((item) => item.job_reference === current.job_reference)) {
       accumulator.push(current);
     }
     return accumulator;
@@ -163,7 +163,7 @@ const fetchLinkedInJobs = async () => {
   console.log("Done fetching jobs, found", jobs.length, "jobs");
 
   jobs.sort((a, b) =>
-    a.datePosted > b.datePosted ? 1 : b.datePosted > a.datePosted ? -1 : 0
+    a.posted_at > b.posted_at ? 1 : b.posted_at > a.posted_at ? -1 : 0
   );
 
   const xml =
