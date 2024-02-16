@@ -8,6 +8,7 @@
 Du startar programmet genom att öppna filen "run.bat"
 
 Programmet skapar en ny fil när det är klart som innehåller de jobb den kunde hitta (jobs.xml).
+Filen publiceras även automatiskt på: https://gustav-leffler.github.io/job-fetcher/jobs.xml
 
 # Lägg till söklänk
 1. Öppna LinkedIn i en Inkognitoflik (så du inte är inloggad)
