@@ -24,7 +24,9 @@ const fetchJobPost = async (url) => {
         location: jobPosting.jobLocation?.address?.addressLocality ?? "",
         title: jobPosting.title,
         country: jobPosting.jobLocation?.address?.addressCountry ?? "",
-        job_type: jobPosting.employmentType,
+        job_type: jobPosting.employmentType
+          .replace("PART_TIME", "Deltid")
+          .replace("FULL_TIME", "Heltid"),
         posted_at: jobPosting.datePosted,
         job_reference: id,
         company: jobPosting.hiringOrganization.name,
@@ -154,7 +156,9 @@ const fetchLinkedInJobs = async () => {
 
   // Remove duplicates
   jobs = jobs.reduce((accumulator, current) => {
-    if (!accumulator.find((item) => item.job_reference === current.job_reference)) {
+    if (
+      !accumulator.find((item) => item.job_reference === current.job_reference)
+    ) {
       accumulator.push(current);
     }
     return accumulator;
