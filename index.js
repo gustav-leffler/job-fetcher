@@ -30,7 +30,11 @@ const fetchJobPost = async (url) => {
         posted_at: jobPosting.datePosted,
         job_reference: id,
         company: jobPosting.hiringOrganization.name,
-        company_logo: jobPosting.hiringOrganization.logo,
+        // Logo URL has replaced "&" with "&amp;", so we change it back to a valid url.
+        company_logo: jobPosting.hiringOrganization.logo.replaceAll(
+          "&amp;",
+          "&"
+        ),
         company_website: jobPosting.hiringOrganization.sameAs,
         category: jobPosting.industry,
         url: url,
