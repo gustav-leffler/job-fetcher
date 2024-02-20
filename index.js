@@ -31,10 +31,8 @@ const fetchJobPost = async (url) => {
         job_reference: id,
         company: jobPosting.hiringOrganization.name,
         // Logo URL has replaced "&" with "&amp;", so we change it back to a valid url.
-        company_logo: jobPosting.hiringOrganization.logo.replaceAll(
-          "&amp;",
-          "&"
-        ),
+        company_logo:
+          jobPosting.hiringOrganization.logo?.replaceAll("&amp;", "&") ?? "",
         company_website: jobPosting.hiringOrganization.sameAs,
         category: jobPosting.industry,
         url: url,
@@ -174,9 +172,11 @@ const fetchLinkedInJobs = async () => {
     a.posted_at > b.posted_at ? 1 : b.posted_at > a.posted_at ? -1 : 0
   );
 
-  const xml =
+  let xml =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     toXML({ source: { jobs: { job: jobs } } }, null, 2);
+
+  xml = xml.replaceAll("&amp;", "&");
 
   try {
     fs.writeFileSync(OUTPUT, xml);
