@@ -172,11 +172,9 @@ const fetchLinkedInJobs = async () => {
     a.posted_at > b.posted_at ? 1 : b.posted_at > a.posted_at ? -1 : 0
   );
 
-  let xml =
+  const xml =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     toXML({ source: { jobs: { job: jobs } } }, null, 2);
-
-  xml = xml.replaceAll("&amp;", "&");
 
   try {
     fs.writeFileSync(OUTPUT, xml);
