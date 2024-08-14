@@ -4,6 +4,8 @@
 3. Öppna denna mapp i terminalen.
 4. Kör kommandot: npm install
 
+5. test
+
 # Kör scraper
 Du startar programmet genom att öppna filen "run.bat"
 
