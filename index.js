@@ -34,7 +34,8 @@ const fetchJobPost = async (url) => {
         company_logo:
           jobPosting.hiringOrganization.logo?.replaceAll("&amp;", "&") ?? "",
         company_website: jobPosting.hiringOrganization.sameAs,
-        category: jobPosting.industry,
+        category:
+          jobPosting.industry == "false" ? "Osorterat" : jobPosting.industry,
         url: url,
         description: jobPosting.description,
         valid_through: jobPosting.validThrough,
