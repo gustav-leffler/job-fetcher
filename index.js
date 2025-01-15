@@ -4,7 +4,7 @@ const fs = require("fs");
 const { toXML } = require("to-xml");
 
 // Det som står innanför citattecknen är det som söks efter i brödtexten för att jobbannonsen ska tas med
-const CONTENT_FILTER = "#gatewayumea2024";
+const CONTENT_FILTER = "#gatewayumea2025";
 
 const OUTPUT = "jobs.xml";
 
@@ -34,7 +34,8 @@ const fetchJobPost = async (url) => {
         company_logo:
           jobPosting.hiringOrganization.logo?.replaceAll("&amp;", "&") ?? "",
         company_website: jobPosting.hiringOrganization.sameAs,
-        category: jobPosting.industry,
+        category:
+          jobPosting.industry == "false" ? "Osorterat" : jobPosting.industry,
         url: url,
         description: jobPosting.description,
         valid_through: jobPosting.validThrough,
@@ -136,8 +137,8 @@ const fetchLinkedInJobs = async () => {
   let jobs = [];
   for (const searchLink of searchLinks) {
     console.log("Fetching from", searchLink);
-    for (let i = 0; i < 1000; i += 25) {
-      console.log("Fetching", i, "-", i + 25);
+    for (let i = 0; i < 1000; i += 10) {
+      console.log("Fetching", i, "-", i + 10);
       const { jobUrlsLength, jobPosts } = await fetchPage(i, searchLink);
       console.log(
         "fetched",
@@ -147,7 +148,7 @@ const fetchLinkedInJobs = async () => {
         "from page ",
         i,
         "-",
-        i + 25
+        i + 10
       );
       jobs = jobs.concat(jobPosts);
       if (jobUrlsLength === 0) {
